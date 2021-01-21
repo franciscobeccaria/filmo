@@ -1,6 +1,8 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
+import axios from 'axios'
 
+import MovieCard from './MovieCard'
 
 const Slider = styled.div`
     display: flex;
@@ -34,23 +36,43 @@ const Slider = styled.div`
 const Title = styled.h4`
     text-align: center;
     padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-    color: #c21c1c;
-    font-family: var(--racing-sans-one-family);;
+    color: white;
+    font-family: var(--racing-sans-one-family);
     font-size: 3rem;
+    @media screen and (max-width: 640px) {
+        font-size: 2.5rem;
+  }
 `
 
+const MovieSlider = ({title, children, mediaType}) => {
+    const [state, setState] = useState([])
 
-const MovieSlider = ({title, children}) => (
-    <div>
+    useEffect(() => {
+        axios.get(`https://api.themoviedb.org/3/trending/${mediaType}/week?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
+        .then(resp => setState(resp.data.results))
+    }, [])
+
+    return (
         <div>
-            <Title>
-                {`${title} >`}
-            </Title>
+            <div>
+                <Title>
+                    {`${title} >`}
+                </Title>
+            </div>
+            <Slider>
+                {children}
+                {state.map(e => 
+                    <MovieCard 
+                        movieTitle={mediaType === 'movie' ? e.title : e.name} 
+                        movieSrc={e.poster_path} 
+                        movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
+                        link={mediaType === 'movie' ? `/movie/${e.id}` : `/tv/${e.id}`}
+                        key={e.id}
+                    />
+                )}
+            </Slider>
         </div>
-        <Slider>
-            {children}
-        </Slider>
-    </div>
-)
+    )
+}
 
 export default MovieSlider

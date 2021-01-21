@@ -1,15 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap');
 
 :root {
   --roboto-family: 'Roboto', Arial, Helvetica, sans-serif;
   --racing-sans-one-family: 'Racing Sans One', Arial, Helvetica, sans-serif;
+  --inter-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: var(--inter-family);
 }
 
 html {
@@ -26,33 +29,14 @@ a {
   color: black;
 }
 
-.splide__track {
-  overflow: hidden;
+.d-inline-block {
+  display: inline-block;
 }
 
-.splide__list {
+.d-flex {
   display: flex;
 }
 
-.splide__slide {
-  outline: none;
-}
-
-.splide__pagination {
-  height: 0px;
-}
-
-.splide__arrows {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.splide__arrow {
-  background: transparent;
-  border: 1px transparent;
-}
-
-.splide__list .is-active {
-  background-color: black;
-  border-radius: 15px;
+.d-none {
+  display: none;
 }
