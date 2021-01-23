@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import {NavLink} from 'react-router-dom'
 
 import Searchbox from './Searchbox'
 import StyledButton from './StyledButton'
@@ -45,6 +46,7 @@ const Title = styled.div`
         font-family: var(--racing-sans-one-family);
         filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
         cursor: pointer;
+        color: white;
     }
 `
 
@@ -59,7 +61,9 @@ height: 70px;
 const Header = () => (
     <Wrapper onClick={(e) => e.target}>
         <Title>
-            <h1>Filmo</h1>
+            <NavLink exact to='/'>
+                <h1>Filmo</h1>
+            </NavLink>
         </Title>
         <nav>
             <ul>
@@ -67,14 +71,18 @@ const Header = () => (
                     <Searchbox/>
                 </Li>
                 <Li>
-                    <StyledButton description="My Lists" inHeader>
-                        <FontAwesomeIcon icon={faListAlt} />
-                    </StyledButton>
+                    <NavLink to='/my-lists'>
+                        <StyledButton description="My Lists" inHeader>
+                            <FontAwesomeIcon icon={faListAlt} />
+                        </StyledButton>
+                    </NavLink>
                 </Li>
                 <Li>
-                    <StyledButton description="My User" inHeader>
-                        <FontAwesomeIcon icon={faUser} />
-                    </StyledButton>
+                    <NavLink to='/my-user'>
+                        <StyledButton description="My User" inHeader>
+                            <FontAwesomeIcon icon={faUser} />
+                        </StyledButton>
+                    </NavLink>
                 </Li>
             </ul>
         </nav>

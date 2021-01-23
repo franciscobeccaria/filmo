@@ -124,35 +124,57 @@ const MoviePage = ({match}) => {
           }))
     }, [])
 
-    return (
-        <Wrapper>
-            <MovieContainer>
-                <MoviePoster>
-                    <img src={`https://image.tmdb.org/t/p/original/${state.poster_path}`} alt={state.title}/>
-                </MoviePoster>
-                <MovieInfo>
-                    <div className="movie-info-1">
-                        <h1>{state.title}</h1>
-                    </div>
-                    <div className="movie-info-2">
-                        <ListCheckbox idFor="want-to-see">Want-To-See</ListCheckbox>
-                        <ListCheckbox idFor="seen-it">Seen-It</ListCheckbox>
-                        <StyledButton inMoviePage><p>All My Lists</p></StyledButton>
-                    </div>
-                    <div className="movie-info-3">
-                        <span>{state.vote_average * 10}%</span>
-                        <span>{state.genres === undefined ? '' : `${state.genres[0].name} - ${state.genres[1].name}`}</span>
-                        <span>{rated === undefined ? '' : rated}</span>
-                        <span>{state.release_date}</span>
-                        <span>{state.runtime} min</span>
-                    </div>
-                    <div className="movie-info-4"><p>Overview</p></div>
-                    <div className="movie-info-5"><p>{state.overview}</p></div>
-                </MovieInfo>
-            </MovieContainer>
-            <div></div>
-        </Wrapper>
-    )
+    const mediaInfo = {
+        poster_path: state.poster_path,
+        title: state.title,
+        id: state.id,
+        release_date: state.release_date,
+    }
+
+    let genres
+    if(state.genres !== undefined) {
+        if (state.genres[1] !== undefined) {
+            genres = `${state.genres[0].name} - ${state.genres[1].name}`
+        } else {
+            genres = `${state.genres[0].name}`
+        }
+    }
+    
+    if (mediaInfo.id === undefined) {
+        return (
+            <div>cargando</div>
+        )
+    } else {
+        return (
+            <Wrapper>
+                <MovieContainer>
+                    <MoviePoster>
+                        <img src={`https://image.tmdb.org/t/p/original/${state.poster_path}`} alt={state.title}/>
+                    </MoviePoster>
+                    <MovieInfo>
+                        <div className="movie-info-1">
+                            <h1>{state.title}</h1>
+                        </div>
+                        <div className="movie-info-2">
+                            <ListCheckbox idFor="want-to-see-movies" mediaInfo={mediaInfo}>Want-To-See</ListCheckbox>
+                            <ListCheckbox idFor="seen-it-movies" mediaInfo={mediaInfo}>Seen-It</ListCheckbox>
+                            <StyledButton inMoviePage><p>All My Lists</p></StyledButton>
+                        </div>
+                        <div className="movie-info-3">
+                            <span>{state.vote_average * 10}%</span>
+                            <span>{genres}</span>
+                            <span>{rated === undefined ? '' : rated}</span>
+                            <span>{state.release_date}</span>
+                            <span>{state.runtime} min</span>
+                        </div>
+                        <div className="movie-info-4"><p>Overview</p></div>
+                        <div className="movie-info-5"><p>{state.overview}</p></div>
+                    </MovieInfo>
+                </MovieContainer>
+                <div></div>
+            </Wrapper>
+        )
+    }
 }
 
 export default MoviePage

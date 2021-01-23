@@ -2,6 +2,9 @@ import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 
+import firebase from 'firebase';
+import 'firebase/firestore';
+
 import MovieCard from './MovieCard'
 
 const Slider = styled.div`
@@ -44,12 +47,20 @@ const Title = styled.h4`
   }
 `
 
-const MovieSlider = ({title, children, mediaType}) => {
+const MovieSlider = ({title, children, mediaType, firebaseDocId}) => {
     const [state, setState] = useState([])
 
     useEffect(() => {
-        axios.get(`https://api.themoviedb.org/3/trending/${mediaType}/week?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
-        .then(resp => setState(resp.data.results))
+        if(firebaseDocId) { 
+            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(`${firebaseDocId}`)
+            .onSnapshot(function(doc) {
+                console.log("Current data: ", doc.data().list);
+                setState(doc.data().list)
+            })
+        } else { 
+            axios.get(`https://api.themoviedb.org/3/trending/${mediaType}/week?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
+            .then(resp => setState(resp.data.results))
+        }
     }, [])
 
     return (
@@ -67,7 +78,7 @@ const MovieSlider = ({title, children, mediaType}) => {
                         movieSrc={e.poster_path} 
                         movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
                         link={mediaType === 'movie' ? `/movie/${e.id}` : `/tv/${e.id}`}
-                        key={e.id}
+                        key={e.id} // En un futuro cambiarlo, porque puede haber la posibilidad de que los ID de movie y tv se repitan. 
                     />
                 )}
             </Slider>

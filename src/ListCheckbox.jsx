@@ -1,5 +1,10 @@
-import React from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import styled from 'styled-components'
+
+import firebase from 'firebase';
+import 'firebase/firestore';
+import { showToastMessage } from './redux/actionCreators';
+import {connect} from 'react-redux'
 
 const Wrapper = styled.div`
     min-width: 50px;
@@ -52,6 +57,8 @@ const Wrapper = styled.div`
         top: 0;
 
         border: 2px solid white;
+
+        transition: all .5s;
     }
 
     & label:hover {
@@ -73,14 +80,130 @@ const Wrapper = styled.div`
     }
 `
 
-const ListCheckbox = ({idFor, children}) => {
+const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
+    const checkbox = useRef(null);
 
-    return (
-        <Wrapper>
-            <input type="checkbox" id={idFor}/>
-            <label htmlFor={idFor}>{children}</label>
-        </Wrapper>
-    )
+    const [state, setState] = useState({
+        checked: undefined,
+    })
+
+    useEffect(() => {
+        console.log('useEffect executed')
+        getListListener('returnOnlyId')
+        console.log('useEffect', state)
+    }, [])
+
+    function getListListener(returnOnlyId) {
+        if(returnOnlyId === 'returnOnlyId') {
+            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            .onSnapshot(function(doc) {
+                let arrayOfId = []
+                doc.data().list.forEach(movie => {
+                    arrayOfId.push(movie.id)
+                })
+                setState({
+                    ...state,
+                    arrayOfId: arrayOfId,
+                })
+                if(arrayOfId.includes(mediaInfo.id)) {
+                    setState({
+                        ...state,
+                        checked: true,
+                    })
+                } else {
+                    setState({
+                        ...state,
+                        checked: false,
+                    })
+                }
+            })
+        } else {
+            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            .onSnapshot(function(doc) {
+                setState({
+                    ...state,
+                    arrayOfMovies: doc.data().list,
+                })
+            })
+        }
+    }
+
+    function addMovieToList() {
+        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            docRef.get().then(function (doc) {
+                if (doc.exists) {
+                  docRef.update({
+                    list: firebase.firestore.FieldValue.arrayUnion({
+                      title: mediaInfo.title,
+                      id: mediaInfo.id,
+                      poster: mediaInfo.poster_path,
+                      release: mediaInfo.release_date,
+                    }),
+                  });
+                  exampleFunction(`${mediaInfo.title} added to ${children}`)
+                } else {
+                  console.log(doc.data());
+                  console.log('the document not exists.');
+                }
+              })
+              .catch(function (error) {
+                console.log('Error getting document:', error);
+              });
+    }
+
+    function removeMovieFromList() {
+        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            docRef.get().then(function (doc) {
+                if (doc.exists) {
+                  docRef.update({
+                    list: firebase.firestore.FieldValue.arrayRemove({
+                      title: mediaInfo.title,
+                      id: mediaInfo.id,
+                      poster: mediaInfo.poster_path,
+                      release: mediaInfo.release_date,
+                    }),
+                  });
+                  exampleFunction(`${mediaInfo.title} removed from ${children}`)
+                } else {
+                  console.log(doc.data());
+                  console.log('the document not exists.');
+                }
+              })
+              .catch(function (error) {
+                console.log('Error getting document:', error);
+              });
+    }
+
+    if(state.checked === undefined) {
+        return (
+            <Wrapper>
+                <input ref={checkbox} type="checkbox" id={idFor}/>
+                <label >Cargando...</label>
+            </Wrapper>
+        )
+    } else if (state.checked === true) {
+        return (
+            <Wrapper>
+                <input defaultChecked={true} ref={checkbox} type="checkbox" /* id={idFor} *//>
+                <label htmlFor={idFor} onClick={() => removeMovieFromList()}>{children}</label>
+            </Wrapper>
+        ) 
+    } else if (state.checked === false) {
+        return (
+            <Wrapper>
+                <input defaultChecked={false} ref={checkbox} type="checkbox" /* id={idFor} *//>
+                <label htmlFor={idFor} onClick={() => addMovieToList()}>{children}</label>
+            </Wrapper>
+        ) 
+    }
 }
 
-export default ListCheckbox
+const mapStateToProps = () => ({})
+
+const mapDispatchToProps = dispatch => ({
+    exampleFunction(text) {
+        dispatch(showToastMessage(text))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ListCheckbox)

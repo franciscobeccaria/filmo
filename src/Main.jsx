@@ -13,6 +13,8 @@ const Main = () => {
         <Wrapper>
             <MovieSlider title="Trending Movies" mediaType="movie"/>
             <MovieSlider title="Trending TV Shows" mediaType="tv"/>
+            <MovieSlider title="Want-To-See Movies" mediaType="movie" firebaseDocId="Want To See Movies"/>
+            <MovieSlider title="Want-To-See TV Shows" mediaType="tv" firebaseDocId="Want To See TV Shows"/>
         </Wrapper>
     )
 }
