@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import styled from 'styled-components'
+import axios from 'axios'
 import SearchResult from './SearchResult'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -152,10 +153,24 @@ class Searchbox extends Component {
         this.state = {
             openSearch: false,
             openResults: false,
+            resultsData: {},
         }
 
         this.onClickButton = this.onClickButton.bind(this)
         this.onChangeInput = this.onChangeInput.bind(this)
+        this.delayTimer = undefined
+        this.doSearch = this.doSearch.bind(this)
+    }
+
+    doSearch(searchURL) {
+        clearTimeout(this.delayTimer);
+        this.delayTimer = setTimeout(() => {
+            axios.get(searchURL).then(response => {
+                this.setState({
+                    resultsData: response.data
+                })
+            })
+        }, 1000); // Will do the ajax stuff after 1000 ms, or 1 s
     }
 
     onClickButton(e) {
@@ -164,8 +179,15 @@ class Searchbox extends Component {
         })
     }
 
+    // Vamos a mostrar 15 resultados. La petición nos entrega responde.data.total_results si este es 16 o más entonces mostrar el Load More
     onChangeInput(e) {
-        if(e.target.value !== '') {
+        if(e.target.value.length >= 2) {
+            this.setState({
+                resultsData: {}
+            })
+            const searchValue = e.target.value.trim().toLowerCase().replace(/ /g, '+')
+            const searchURL = `https://api.themoviedb.org/3/search/movie?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US&query=${searchValue}`
+            this.doSearch(searchURL)
             this.setState({
                 openResults: true,
             })
@@ -182,7 +204,7 @@ class Searchbox extends Component {
         const button = searchBox.children[2];
         searchBox.parentElement.style.position = 'relative'
         
-        // Close Searchbox
+        // Close Searchbox if click outside
         document.addEventListener('click', (e) => {
             if (e.target !== button && e.target !== input && e.target !== button.firstElementChild) {
                 this.setState({
@@ -252,16 +274,18 @@ class Searchbox extends Component {
             <Wrapper className="search-box">
                 <div>
                     <ul>
-                        <SearchResult title="Soul" />
-                        <SearchResult title="Star Wars"/>
-                        <SearchResult title="Fast and Furious"/>
-                        <SearchResult title="San Francisco, California"/>
-                        <SearchResult title="Startrek"/>
-                        <SearchResult title="The Simpsons"/>
-                        <SearchResult title="Modern Family"/>
-                        <SearchResult title="The Good Place"/>
-                        <SearchResult title="Time"/>
-                        <LoadMoreResults><p>Load More ></p></LoadMoreResults>
+                        {this.state.resultsData.results === undefined ? 'Cargando...' : this.state.resultsData.results.slice(0, 15).map(e =>
+                            <SearchResult
+                                title={e.title}
+                                year={e.release_date === undefined ? '' : e.release_date.slice(0,4)}
+                                link={`/media/movie/${e.id}`}
+                                key={e.id === undefined ? '' : e.id}
+                            />
+                        )}
+                        {this.state.resultsData.total_results === undefined ? '' : this.state.resultsData.total_results >= 16 
+                        ? <LoadMoreResults><p>Load More ></p></LoadMoreResults>
+                        : ''
+                        }
                     </ul>
                 </div>
                 <input onChange={this.onChangeInput} type="text" placeholder="Search city by name..."/>

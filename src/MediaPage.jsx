@@ -108,28 +108,44 @@ const MovieInfo = styled.div`
         }
 `
 
-const MoviePage = ({match}) => {
+const MediaPage = ({match}) => {
     const [state, setState] = useState({})
     const [rated, setRated] = useState()
 
-    console.log(match)
-
     useEffect(() => {
-        axios.get(`https://api.themoviedb.org/3/movie/${match.params.id}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US`)
-        .then(resp => setState(resp.data))
-        axios.get(`https://api.themoviedb.org/3/movie/${match.params.id}/release_dates?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
-        .then(resp => resp.data.results.forEach((eachCountry) => {
-            if (eachCountry.iso_3166_1 === 'US') {
-              setRated(eachCountry.release_dates[0].certification)
-            }
-          }))
+        console.log('useEffect de MediaPage')
+        if(match.params.mediaType === 'movie') {
+            axios.get(`https://api.themoviedb.org/3/movie/${match.params.id}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US`)
+            .then(resp => setState(resp.data))
+            axios.get(`https://api.themoviedb.org/3/movie/${match.params.id}/release_dates?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
+            .then(resp => resp.data.results.forEach((eachCountry) => {
+                if (eachCountry.iso_3166_1 === 'US') {
+                setRated(eachCountry.release_dates[0].certification)
+                }
+            }))
+        }
+        if(match.params.mediaType === 'tv') {
+            axios.get(`https://api.themoviedb.org/3/tv/${match.params.id}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US`)
+            .then(resp => setState(resp.data))
+        }
     }, [])
 
-    const mediaInfo = {
-        poster_path: state.poster_path,
-        title: state.title,
-        id: state.id,
-        release_date: state.release_date,
+    let mediaInfo
+    if(match.params.mediaType === 'movie') {
+        mediaInfo = {
+            poster_path: state.poster_path,
+            title: state.title,
+            id: state.id,
+            release_date: state.release_date,
+        }
+    }
+    if(match.params.mediaType === 'tv') {
+        mediaInfo = {
+            poster_path: state.poster_path,
+            name: state.name,
+            id: state.id,
+            first_air_date: state.first_air_date,
+        }
     }
 
     let genres
@@ -140,7 +156,7 @@ const MoviePage = ({match}) => {
             genres = `${state.genres[0].name}`
         }
     }
-    
+
     if (mediaInfo.id === undefined) {
         return (
             <div>cargando</div>
@@ -150,23 +166,23 @@ const MoviePage = ({match}) => {
             <Wrapper>
                 <MovieContainer>
                     <MoviePoster>
-                        <img src={`https://image.tmdb.org/t/p/original/${state.poster_path}`} alt={state.title}/>
+                        <img src={`https://image.tmdb.org/t/p/original/${state.poster_path}`} alt={match.params.mediaType === 'movie' ? state.title : state.name}/>
                     </MoviePoster>
                     <MovieInfo>
                         <div className="movie-info-1">
-                            <h1>{state.title}</h1>
+                            <h1>{match.params.mediaType === 'movie' ? state.title : state.name}</h1>
                         </div>
                         <div className="movie-info-2">
-                            <ListCheckbox idFor="want-to-see-movies" mediaInfo={mediaInfo}>Want-To-See</ListCheckbox>
-                            <ListCheckbox idFor="seen-it-movies" mediaInfo={mediaInfo}>Seen-It</ListCheckbox>
+                            <ListCheckbox firebaseListName={match.params.mediaType === 'movie' ? 'want-to-see-movies' : 'want-to-see-tv-shows'} mediaInfo={mediaInfo}>Want-To-See</ListCheckbox>
+                            <ListCheckbox firebaseListName={match.params.mediaType === 'movie' ? 'seen-it-movies' : 'seen-it-tv-shows'} mediaInfo={mediaInfo}>Seen-It</ListCheckbox>
                             <StyledButton inMoviePage><p>All My Lists</p></StyledButton>
                         </div>
                         <div className="movie-info-3">
                             <span>{state.vote_average * 10}%</span>
                             <span>{genres}</span>
-                            <span>{rated === undefined ? '' : rated}</span>
-                            <span>{state.release_date}</span>
-                            <span>{state.runtime} min</span>
+                            {rated === undefined ? '' : <span>{rated}</span>}
+                            <span>{match.params.mediaType === 'movie' ? state.release_date : state.first_air_date}</span>
+                            <span>{match.params.mediaType === 'movie' ? `${state.runtime} min` : `${state.episode_run_time[0]} min per Episode`}</span>
                         </div>
                         <div className="movie-info-4"><p>Overview</p></div>
                         <div className="movie-info-5"><p>{state.overview}</p></div>
@@ -178,4 +194,4 @@ const MoviePage = ({match}) => {
     }
 }
 
-export default MoviePage
+export default MediaPage

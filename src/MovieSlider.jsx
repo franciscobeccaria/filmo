@@ -48,13 +48,12 @@ const Title = styled.h4`
 `
 
 const MovieSlider = ({title, children, mediaType, firebaseDocId}) => {
-    const [state, setState] = useState([])
+    const [state, setState] = useState()
 
     useEffect(() => {
         if(firebaseDocId) { 
             firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(`${firebaseDocId}`)
             .onSnapshot(function(doc) {
-                console.log("Current data: ", doc.data().list);
                 setState(doc.data().list)
             })
         } else { 
@@ -72,15 +71,17 @@ const MovieSlider = ({title, children, mediaType, firebaseDocId}) => {
             </div>
             <Slider>
                 {children}
-                {state.map(e => 
+                {console.log(state)}
+                {state === undefined ? 'Cargando...' : state.length === 0 ? 'Lista vacia' : state.map(e => 
                     <MovieCard 
                         movieTitle={mediaType === 'movie' ? e.title : e.name} 
                         movieSrc={e.poster_path} 
                         movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
-                        link={mediaType === 'movie' ? `/movie/${e.id}` : `/tv/${e.id}`}
-                        key={e.id} // En un futuro cambiarlo, porque puede haber la posibilidad de que los ID de movie y tv se repitan. 
+                        link={mediaType === 'movie' ? `media/movie/${e.id}` : `media/tv/${e.id}`}
+                        key={`${mediaType}-${e.id}`} 
                     />
                 )}
+                {state === undefined ? '' : state.length === 20 ? 'Ver más' : ''}
             </Slider>
         </div>
     )

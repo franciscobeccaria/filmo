@@ -8,8 +8,7 @@ import 'firebase/firestore';
 
 import Header from './Header';
 import Main from './Main';
-import MoviePage from './MoviePage';
-import TVPage from './TVPage';
+import MediaPage from './MediaPage';
 import ToastMessage from './ToastMessage';
 
 const Footer = styled.footer`
@@ -38,8 +37,7 @@ function App() {
           <Route path="/" exact>
             <Main />
           </Route>
-          <Route path="/movie/:id" component={MoviePage} />
-          <Route path="/tv/:id" component={TVPage} />
+          <Route path="/media/:mediaType/:id" component={(props) => <MediaPage {...props} key={window.location.pathname} />} />
         </Switch>
         <Footer />
         <ToastMessage />

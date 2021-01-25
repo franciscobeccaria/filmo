@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import {Link} from 'react-router-dom'
+
 const Wrapper = styled.li`
     background-color: #093048;
     cursor: pointer;
@@ -25,10 +27,12 @@ const Wrapper = styled.li`
     }
 `
 
-const SearchResult = ({title}) => (
+const SearchResult = ({title, year, link}) => (
+    <Link to={link}>
         <Wrapper>
-            <p>{title}</p>
+            <p>{title} ({year})</p>
         </Wrapper>
+    </Link>
 )
 
 export default SearchResult

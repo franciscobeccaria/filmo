@@ -80,7 +80,7 @@ const Wrapper = styled.div`
     }
 `
 
-const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
+const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) => {
     const checkbox = useRef(null);
 
     const [state, setState] = useState({
@@ -95,7 +95,7 @@ const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
 
     function getListListener(returnOnlyId) {
         if(returnOnlyId === 'returnOnlyId') {
-            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
             .onSnapshot(function(doc) {
                 let arrayOfId = []
                 doc.data().list.forEach(movie => {
@@ -118,7 +118,7 @@ const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
                 }
             })
         } else {
-            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
             .onSnapshot(function(doc) {
                 setState({
                     ...state,
@@ -129,18 +129,28 @@ const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
     }
 
     function addMovieToList() {
-        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
             docRef.get().then(function (doc) {
-                if (doc.exists) {
+                if (doc.exists && mediaInfo.title) {
                   docRef.update({
                     list: firebase.firestore.FieldValue.arrayUnion({
                       title: mediaInfo.title,
                       id: mediaInfo.id,
-                      poster: mediaInfo.poster_path,
-                      release: mediaInfo.release_date,
+                      poster_path: mediaInfo.poster_path,
+                      release_date: mediaInfo.release_date,
                     }),
                   });
                   exampleFunction(`${mediaInfo.title} added to ${children}`)
+                } else if(doc.exists && mediaInfo.name) {
+                    docRef.update({
+                        list: firebase.firestore.FieldValue.arrayUnion({
+                          name: mediaInfo.name,
+                          id: mediaInfo.id,
+                          poster_path: mediaInfo.poster_path,
+                          first_air_date: mediaInfo.first_air_date,
+                        }),
+                      });
+                      exampleFunction(`${mediaInfo.name} added to ${children}`)    
                 } else {
                   console.log(doc.data());
                   console.log('the document not exists.');
@@ -152,18 +162,28 @@ const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
     }
 
     function removeMovieFromList() {
-        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(idFor)
+        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
             docRef.get().then(function (doc) {
-                if (doc.exists) {
+                if (doc.exists && mediaInfo.title) {
                   docRef.update({
                     list: firebase.firestore.FieldValue.arrayRemove({
                       title: mediaInfo.title,
                       id: mediaInfo.id,
-                      poster: mediaInfo.poster_path,
-                      release: mediaInfo.release_date,
+                      poster_path: mediaInfo.poster_path,
+                      release_date: mediaInfo.release_date,
                     }),
                   });
                   exampleFunction(`${mediaInfo.title} removed from ${children}`)
+                } else if(doc.exists && mediaInfo.name) {
+                    docRef.update({
+                        list: firebase.firestore.FieldValue.arrayRemove({
+                          name: mediaInfo.name,
+                          id: mediaInfo.id,
+                          poster_path: mediaInfo.poster_path,
+                          first_air_date: mediaInfo.first_air_date,
+                        }),
+                      });
+                      exampleFunction(`${mediaInfo.name} removed from ${children}`)
                 } else {
                   console.log(doc.data());
                   console.log('the document not exists.');
@@ -177,22 +197,22 @@ const ListCheckbox = ({idFor, children, mediaInfo, exampleFunction}) => {
     if(state.checked === undefined) {
         return (
             <Wrapper>
-                <input ref={checkbox} type="checkbox" id={idFor}/>
+                <input ref={checkbox} type="checkbox"/>
                 <label >Cargando...</label>
             </Wrapper>
         )
     } else if (state.checked === true) {
         return (
             <Wrapper>
-                <input defaultChecked={true} ref={checkbox} type="checkbox" /* id={idFor} *//>
-                <label htmlFor={idFor} onClick={() => removeMovieFromList()}>{children}</label>
+                <input defaultChecked={true} ref={checkbox} type="checkbox"/>
+                <label onClick={() => removeMovieFromList()}>{children}</label>
             </Wrapper>
         ) 
     } else if (state.checked === false) {
         return (
             <Wrapper>
-                <input defaultChecked={false} ref={checkbox} type="checkbox" /* id={idFor} *//>
-                <label htmlFor={idFor} onClick={() => addMovieToList()}>{children}</label>
+                <input defaultChecked={false} ref={checkbox} type="checkbox"/>
+                <label onClick={() => addMovieToList()}>{children}</label>
             </Wrapper>
         ) 
     }
