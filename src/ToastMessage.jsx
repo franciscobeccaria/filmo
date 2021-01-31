@@ -56,8 +56,8 @@ const Wrapper = styled.div`
     }
 `
 
-const ToastMessage = ({toastMessageText, exampleFunction}) => {
-    const toastMessage = useRef(null);
+const ToastMessage = ({toastMessageText, toastMessage}) => {
+    const toastMessageWrapper = useRef(null);
 
     const showToastMessage = () => {
             toastMessage.current.innerHTML = toastMessageText
@@ -65,17 +65,16 @@ const ToastMessage = ({toastMessageText, exampleFunction}) => {
             setTimeout(function () {
                 toastMessage.current.innerHTML = ''
                 toastMessage.current.classList.remove('animation')
-                exampleFunction('')
+                toastMessage('')
             }, 2000);
     }
 
-    console.log(toastMessageText)
     if(toastMessageText !== undefined && toastMessageText !== '') {
         showToastMessage()
     }
 
     return (
-        <Wrapper ref={toastMessage}>{toastMessageText}</Wrapper>
+        <Wrapper ref={toastMessageWrapper}>{toastMessageText}</Wrapper>
     )
 }
 
@@ -86,11 +85,13 @@ const mapStateToProps = state => {
                 toastMessageText: state.toastMessageText
             }
         )
+    } else {
+        return {}
     }
 }
 
 const mapDispatchToProps = dispatch => ({
-    exampleFunction(text) {
+    toastMessage(text) {
         dispatch(showToastMessage(text))
     }
 })

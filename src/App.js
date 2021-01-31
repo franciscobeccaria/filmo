@@ -2,14 +2,21 @@ import styled from 'styled-components';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
+import { getUserData } from './redux/actionCreators';
 
 import firebase from 'firebase';
 import 'firebase/firestore';
+import 'firebase/auth';
 
 import Header from './Header';
 import Main from './Main';
 import MediaPage from './MediaPage';
 import ToastMessage from './ToastMessage';
+import LoginModal from './LoginModal';
+import MyUser from './MyUser';
+import MyLists from './MyLists';
+import ListPage from './ListPage';
+import TheMovieDBListPage from './TheMovieDBListPage';
 
 const Footer = styled.footer`
   width: 100%;
@@ -28,6 +35,8 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
+store.dispatch(getUserData());
+
 function App() {
   return (
     <Provider store={store}>
@@ -38,9 +47,17 @@ function App() {
             <Main />
           </Route>
           <Route path="/media/:mediaType/:id" component={(props) => <MediaPage {...props} key={window.location.pathname} />} />
+          <Route path="/my-user" component={MyUser} />
+          <Route path="/my-lists/" component={MyLists} />
+          <Route path="/list/:list" component={ListPage} />
+          <Route
+            path="/db/:type/:mediaType/:searchValue"
+            component={(props) => <TheMovieDBListPage {...props} key={window.location.pathname} />}
+          />
         </Switch>
         <Footer />
         <ToastMessage />
+        <LoginModal />
       </Router>
     </Provider>
   );

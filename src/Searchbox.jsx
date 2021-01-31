@@ -2,6 +2,9 @@ import React, {Component} from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 import SearchResult from './SearchResult'
+import Loader from './Loader'
+
+import {Link} from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
@@ -32,7 +35,7 @@ const Wrapper = styled.div`
     align-items: center;
     justify-content: center;
 
-    & input {
+    & > input {
     position: absolute;
     width: calc(100% - ${SEARCH_BOX_CLOSED_WIDTH} / 2);
     left: 0;
@@ -96,6 +99,41 @@ const Wrapper = styled.div`
 & > div ul {
   overflow: auto;
   width: 100%;
+  & .no-results {
+        width: 90%;
+        height: 8rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @media screen and (max-width: 640px) {
+            height: 6rem;
+        }
+        & div {
+            height: 6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0099ff;
+            border-radius: 15px;
+            outline: none;
+            border: 0px;
+            @media screen and (max-width: 640px) {
+                height: 4rem;
+            }
+            & p {
+                font-family: "Racing Sans One", Arial, Helvetica, sans-serif;
+                color: white;
+                font-size: 2rem;
+                margin: 0 2rem 0 2rem;
+                @media screen and (max-width: 640px) {
+                    font-siZe: 2rem;
+                }
+                @media screen and (max-width: 400px) {
+                    font-siZe: 1.75rem;
+                }
+            }
+        }
+    }
 }
 
 /*Scrollbar Styles*/
@@ -146,9 +184,62 @@ const LoadMoreResults = styled.li`
     }
 `
 
+const SegmentedControl = styled.div`
+    position: relative;
+    background-color: #093048;
+    z-index: 5;
+    width: 90%;
+    max-width: 500px;
+    margin-bottom: 10px;
+    height: 30px;
+    border-radius: 10px;
+    display: none;
+    & input {
+    display: none;
+    }
+    .background,
+    & label {
+    width: 50%;
+    height: 100%;
+    text-align: center;
+    display: inline-block;
+    padding-top: 10px;
+    //margin-right: -3px;
+    z-index: 2;
+    cursor: pointer;
+    //outline: 1px solid green;
+    }
+    & .background {
+    background-color: #0099ff;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    }
+    & > input.one:checked ~ .background {
+    transform: translateX(0);
+    transition: transform 0.5s ease-in-out, border-radius 0.5s;
+    border-radius: 10px 0 0 10px;
+    }
+    & > input.two:checked ~ .background {
+    transform: translateX(100%);
+    transition: transform 0.5s ease-in-out, border-radius 0.5s;
+    border-radius: 0 10px 10px 0;
+    }
+    & input.three:checked ~ .background {
+    transform: translateX(241px);
+    transition: transform 0.5s ease-in-out;
+    }
+`
+
 class Searchbox extends Component {
     constructor(props) {
         super(props)
+
+        this.moviesRadioInput = React.createRef();
+        this.tvRadioInput = React.createRef();
+        this.searchBoxSegmentedControl = React.createRef();
+        this.searchBoxInput = React.createRef();
 
         this.state = {
             openSearch: false,
@@ -174,6 +265,7 @@ class Searchbox extends Component {
     }
 
     onClickButton(e) {
+        this.searchBoxInput.current.focus()
         this.setState({
             openSearch: true,
         })
@@ -181,12 +273,18 @@ class Searchbox extends Component {
 
     // Vamos a mostrar 15 resultados. La petición nos entrega responde.data.total_results si este es 16 o más entonces mostrar el Load More
     onChangeInput(e) {
-        if(e.target.value.length >= 2) {
+        if(this.searchBoxInput.current.value.length >= 2) {
             this.setState({
                 resultsData: {}
             })
-            const searchValue = e.target.value.trim().toLowerCase().replace(/ /g, '+')
-            const searchURL = `https://api.themoviedb.org/3/search/movie?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US&query=${searchValue}`
+            let mediaType
+            if(this.moviesRadioInput.current.checked === true) {
+                mediaType = 'movie'
+            } else {
+                mediaType = 'tv'
+            }
+            const searchValue = this.searchBoxInput.current.value.trim().toLowerCase().replace(/ /g, '+')
+            const searchURL = `https://api.themoviedb.org/3/search/${mediaType}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US&query=${searchValue}`
             this.doSearch(searchURL)
             this.setState({
                 openResults: true,
@@ -206,7 +304,15 @@ class Searchbox extends Component {
         
         // Close Searchbox if click outside
         document.addEventListener('click', (e) => {
-            if (e.target !== button && e.target !== input && e.target !== button.firstElementChild) {
+            if (e.target !== button && 
+                e.target !== input && 
+                e.target !== button.firstElementChild && 
+                e.target !== this.searchBoxSegmentedControl.current &&
+                e.target !== this.searchBoxSegmentedControl.current.children[0] &&
+                e.target !== this.searchBoxSegmentedControl.current.children[1] &&
+                e.target !== this.searchBoxSegmentedControl.current.children[2] &&
+                e.target !== this.searchBoxSegmentedControl.current.children[3]
+                ) {
                 this.setState({
                     openSearch: false,
                     openResults: false,
@@ -229,21 +335,31 @@ class Searchbox extends Component {
 
     componentDidUpdate() {
             const searchBox = document.getElementsByClassName('search-box')[0];
+            const header = searchBox.parentElement.parentElement.parentElement.parentElement
+            const wrapper = searchBox.parentElement
             const searchResults = searchBox.children[0];
+            const segmentedControl = searchResults.children[0];
             const input = searchBox.children[1];
             const button = searchBox.children[2];
+            const move = () => {
+                header.style.position = 'static'
+                wrapper.style.position = 'relative'
+            }
             if (this.state.openSearch === true) {
                 if(window.innerWidth > 625) {
                     // 500 = Searchbox.maxWidth | 625 = 500/0.8
-                    searchBox.style.transform = `translateX(-${this.distanceSearchBoxToScreenLeft+25-window.innerWidth/2+500/2}px)`
+                    //searchBox.style.transform = `translateX(-${this.distanceSearchBoxToScreenLeft+25-window.innerWidth/2+500/2}px)`
                 } else {
-                    searchBox.style.transform = `translateX(-${this.distanceSearchBoxToScreenLeft+25-window.innerWidth/2+window.innerWidth*0.8/2}px)`
+                    //searchBox.style.transform = `translateX(-${this.distanceSearchBoxToScreenLeft+25-window.innerWidth/2+window.innerWidth*0.8/2}px)`
                 }
+                header.style.position = 'relative'
+                wrapper.style.position = 'static'
                 searchBox.style.width = '80vw';
                 input.style.opacity = '1';
                 searchBox.style.zIndex = '1';
                 searchResults.style.display = 'flex';
             } else {
+                setTimeout(() => move(), 500)
                 searchResults.style.display = 'none';
                 searchBox.style.zIndex = 'auto';
                 searchBox.style.transform = 'translateX(-50%)'
@@ -256,6 +372,7 @@ class Searchbox extends Component {
                 searchResults.style.minHeight = '100px';
                 searchResults.style.maxHeight = '300px';
                 searchResults.style.zIndex = '5';
+                segmentedControl.style.display = 'block';
                 input.style.borderBottomLeftRadius = '0';
                 button.style.borderRadius = '0 10px 0 0';
                 button.style.transition = '0.5s';
@@ -264,6 +381,7 @@ class Searchbox extends Component {
                 searchResults.style.minHeight = '0px';
                 searchResults.style.maxHeight = '0px';
                 searchResults.style.zIndex = '-1';
+                segmentedControl.style.display = 'none';
                 input.style.borderBottomLeftRadius = '10px';
                 button.style.borderRadius = '10px';
             }
@@ -273,22 +391,43 @@ class Searchbox extends Component {
         return (
             <Wrapper className="search-box">
                 <div>
+                    <SegmentedControl className="segmented-control" ref={this.searchBoxSegmentedControl}>
+                        <input className='one' type="radio" id="movies-searchbox" name="mediatype-searchbox" value="movies-searchbox" ref={this.moviesRadioInput} defaultChecked={true} onChange={() => this.onChangeInput()}/>
+                        <label className='one' htmlFor="movies-searchbox">Movies</label>
+                        <input className='two' type="radio" id="tv-searchbox" name="mediatype-searchbox" value="tv-searchbox" ref={this.tvRadioInput} onChange={() => this.onChangeInput()}/>
+                        <label className='two' htmlFor="tv-searchbox">TV Shows</label>
+                        <div className='background'></div>
+                    </SegmentedControl>
                     <ul>
-                        {this.state.resultsData.results === undefined ? 'Cargando...' : this.state.resultsData.results.slice(0, 15).map(e =>
+                        {this.state.resultsData.results === undefined 
+                        ? <Loader/> 
+                        
+                        : this.state.resultsData.results.slice(0, 15).map(e =>
                             <SearchResult
-                                title={e.title}
-                                year={e.release_date === undefined ? '' : e.release_date.slice(0,4)}
-                                link={`/media/movie/${e.id}`}
+                                title={e.title === undefined ? e.name : e.title}
+                                year={e.release_date === undefined ? e.first_air_date === undefined ? '' : e.first_air_date.slice(0,4) : e.release_date.slice(0,4)}
+                                link={e.title === undefined ? `/media/tv/${e.id}` : `/media/movie/${e.id}`}
                                 key={e.id === undefined ? '' : e.id}
                             />
                         )}
                         {this.state.resultsData.total_results === undefined ? '' : this.state.resultsData.total_results >= 16 
-                        ? <LoadMoreResults><p>Load More ></p></LoadMoreResults>
+                        ? <Link to={`/db/search/${this.moviesRadioInput.current.checked === true ? 'movie' : 'tv'}/${this.searchBoxInput.current.value.trim().toLowerCase().replace(/ /g, '+')}`}>
+                            <LoadMoreResults><p>Load More ></p></LoadMoreResults>
+                        </Link>
                         : ''
+                        }
+                        {this.state.resultsData.results === undefined ? '' : this.state.resultsData.results.length === 0
+                            ? 
+                            <div className='no-results'>
+                                <div>
+                                    <p>No results found</p>
+                                </div>
+                            </div>
+                            : ''
                         }
                     </ul>
                 </div>
-                <input onChange={this.onChangeInput} type="text" placeholder="Search city by name..."/>
+                <input onChange={this.onChangeInput} ref={this.searchBoxInput} type="text" placeholder="Search by name..."/>
                 <button onClick={this.onClickButton}><FontAwesomeIcon icon={faSearch} /></button>
             </Wrapper>
         )

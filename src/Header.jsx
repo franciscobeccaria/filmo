@@ -2,11 +2,18 @@ import React from 'react'
 import styled from 'styled-components'
 import {NavLink} from 'react-router-dom'
 
+import firebase from 'firebase';
+import 'firebase/firestore';
+import 'firebase/auth';
+
+import { showLoginModal } from './redux/actionCreators';
+import {connect} from 'react-redux'
+
 import Searchbox from './Searchbox'
 import StyledButton from './StyledButton'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faListAlt, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faListAlt, faUser, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 
 const Wrapper = styled.header`
     width: 100%;
@@ -58,8 +65,10 @@ height: 70px;
     }
 `
 
-const Header = () => (
-    <Wrapper onClick={(e) => e.target}>
+const Header = ({loginModal, user}) => {
+
+    return(
+    <Wrapper>
         <Title>
             <NavLink exact to='/'>
                 <h1>Filmo</h1>
@@ -68,25 +77,52 @@ const Header = () => (
         <nav>
             <ul>
                 <Li>
-                    <Searchbox/>
+                    <Searchbox user={user}/>
                 </Li>
-                <Li>
-                    <NavLink to='/my-lists'>
-                        <StyledButton description="My Lists" inHeader>
-                            <FontAwesomeIcon icon={faListAlt} />
-                        </StyledButton>
-                    </NavLink>
-                </Li>
-                <Li>
-                    <NavLink to='/my-user'>
-                        <StyledButton description="My User" inHeader>
-                            <FontAwesomeIcon icon={faUser} />
-                        </StyledButton>
-                    </NavLink>
-                </Li>
+                {user
+                    ? 
+                        <>
+                            <Li>
+                                <NavLink to='/my-lists'>
+                                    <StyledButton description="My Lists" inHeader>
+                                        <FontAwesomeIcon icon={faListAlt} />
+                                    </StyledButton>
+                                </NavLink>
+                            </Li>
+                            <Li>
+                                <NavLink to='/my-user'>
+                                    <StyledButton description="My User" inHeader>
+                                        <FontAwesomeIcon icon={faUser} />
+                                    </StyledButton>
+                                </NavLink>
+                            </Li>
+                        </>
+                    : ''
+                }
+                { user === null
+                    ? 
+                        <Li>
+                            <StyledButton description="Login" inHeader /* styledOnClick={() => loginWithGoogle()} */ styledOnClick={() => loginModal(true)}>
+                                <FontAwesomeIcon icon={faSignInAlt}/>
+                            </StyledButton>
+                        </Li>
+                    : ''
+                }
             </ul>
         </nav>
     </Wrapper>
-)
+)}
 
-export default Header
+const mapStateToProps = state => {
+    return ({
+        user: state.user
+    })
+}
+
+const mapDispatchToProps = dispatch => ({
+    loginModal(text) {
+        dispatch(showLoginModal(text))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header)

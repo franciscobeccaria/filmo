@@ -78,9 +78,19 @@ const Wrapper = styled.div`
         transition: all .5s;
         border: 2px solid white;
     }
+    &.inAllMyListsModal {
+        margin-bottom: 1.5rem;
+        width: 90%;
+    }
 `
 
-const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) => {
+const ListCheckbox = ({firebaseListName, children, mediaInfo, toastMessage, user, inAllMyListsModal}) => {
+    
+    const styledClassName = []
+    if(inAllMyListsModal) {
+        styledClassName.push('inAllMyListsModal')
+    }
+    
     const checkbox = useRef(null);
 
     const [state, setState] = useState({
@@ -88,14 +98,16 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
     })
 
     useEffect(() => {
-        console.log('useEffect executed')
-        getListListener('returnOnlyId')
-        console.log('useEffect', state)
-    }, [])
+        
+        if(user !== undefined && user !== null) {
+            getListListener('returnOnlyId')
+        }
+        
+    }, [user])
 
     function getListListener(returnOnlyId) {
         if(returnOnlyId === 'returnOnlyId') {
-            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
+            firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(firebaseListName)
             .onSnapshot(function(doc) {
                 let arrayOfId = []
                 doc.data().list.forEach(movie => {
@@ -118,7 +130,7 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
                 }
             })
         } else {
-            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
+            firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(firebaseListName)
             .onSnapshot(function(doc) {
                 setState({
                     ...state,
@@ -129,7 +141,7 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
     }
 
     function addMovieToList() {
-        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
+        let docRef = firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(firebaseListName)
             docRef.get().then(function (doc) {
                 if (doc.exists && mediaInfo.title) {
                   docRef.update({
@@ -140,7 +152,7 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
                       release_date: mediaInfo.release_date,
                     }),
                   });
-                  exampleFunction(`${mediaInfo.title} added to ${children}`)
+                  toastMessage(`${mediaInfo.title} added to ${children}`)
                 } else if(doc.exists && mediaInfo.name) {
                     docRef.update({
                         list: firebase.firestore.FieldValue.arrayUnion({
@@ -150,19 +162,20 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
                           first_air_date: mediaInfo.first_air_date,
                         }),
                       });
-                      exampleFunction(`${mediaInfo.name} added to ${children}`)    
+                      toastMessage(`${mediaInfo.name} added to ${children}`)    
                 } else {
-                  console.log(doc.data());
+                    toastMessage('the list not exists.')
                   console.log('the document not exists.');
                 }
               })
               .catch(function (error) {
+                  toastMessage(error)
                 console.log('Error getting document:', error);
               });
     }
 
     function removeMovieFromList() {
-        let docRef = firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(firebaseListName)
+        let docRef = firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(firebaseListName)
             docRef.get().then(function (doc) {
                 if (doc.exists && mediaInfo.title) {
                   docRef.update({
@@ -173,7 +186,7 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
                       release_date: mediaInfo.release_date,
                     }),
                   });
-                  exampleFunction(`${mediaInfo.title} removed from ${children}`)
+                  toastMessage(`${mediaInfo.title} removed from ${children}`)
                 } else if(doc.exists && mediaInfo.name) {
                     docRef.update({
                         list: firebase.firestore.FieldValue.arrayRemove({
@@ -183,45 +196,57 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, exampleFunction}) 
                           first_air_date: mediaInfo.first_air_date,
                         }),
                       });
-                      exampleFunction(`${mediaInfo.name} removed from ${children}`)
+                      toastMessage(`${mediaInfo.name} removed from ${children}`)
                 } else {
-                  console.log(doc.data());
+                  toastMessage('the list not exists')
                   console.log('the document not exists.');
                 }
               })
               .catch(function (error) {
+                  toastMessage(error)
                 console.log('Error getting document:', error);
               });
     }
-
-    if(state.checked === undefined) {
+    if(user === null) {
         return (
-            <Wrapper>
+            <Wrapper className={styledClassName.join(' ')}>
+                <input defaultChecked={false} ref={checkbox} type="checkbox"/>
+                <label onClick={() => toastMessage('Login to use the list')}>{children}</label>
+            </Wrapper>
+        ) 
+    }
+    else if(state.checked === undefined) {
+        return (
+            <Wrapper className={styledClassName.join(' ')}>
                 <input ref={checkbox} type="checkbox"/>
                 <label >Cargando...</label>
             </Wrapper>
         )
     } else if (state.checked === true) {
         return (
-            <Wrapper>
+            <Wrapper className={styledClassName.join(' ')}>
                 <input defaultChecked={true} ref={checkbox} type="checkbox"/>
                 <label onClick={() => removeMovieFromList()}>{children}</label>
             </Wrapper>
         ) 
     } else if (state.checked === false) {
         return (
-            <Wrapper>
+            <Wrapper className={styledClassName.join(' ')}>
                 <input defaultChecked={false} ref={checkbox} type="checkbox"/>
                 <label onClick={() => addMovieToList()}>{children}</label>
             </Wrapper>
         ) 
-    }
+    } 
 }
 
-const mapStateToProps = () => ({})
+const mapStateToProps = state => {
+    return ({
+        user: state.user
+    })
+}
 
 const mapDispatchToProps = dispatch => ({
-    exampleFunction(text) {
+    toastMessage(text) {
         dispatch(showToastMessage(text))
     }
 })

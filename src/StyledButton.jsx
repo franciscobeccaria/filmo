@@ -14,6 +14,7 @@ const Button = styled.button`
     border-radius: 10px;
     outline: none;
     border: 0px;
+    font-family: var(--racing-sans-one-family);
     &:hover {
         background: #00568f;
         transition: all .5s;
@@ -31,10 +32,11 @@ const Button = styled.button`
         box-shadow:black 5px 5px 15px;
         transform: translateY(0px);
         z-index: -5;
+        cursor: pointer;
     }
     &:hover span {
         z-index: 10;
-        cursor: auto;
+        //cursor: auto;
         opacity: 1;
         transform: translateY(50px);
         transition: all .5s;
@@ -58,18 +60,47 @@ const Button = styled.button`
         background: #0099ff;
         border: 2px solid #0099ff;
     }
+    &.secondary {
+        background: transparent;
+        border: 2px solid white;
+    }
+    &.secondary:hover {
+        background: #0099ff;   
+    }
 `
 
-const StyledButton = ({inHeader, inMoviePage, description, children}) => {
+const StyledButton = ({inListPage, loadMore, inMyListsPage, inMyUserPage, secondary, inLoginModal, inHeader, inMoviePage, description, children, styledOnClick}) => {
     const styles = {}
+    const styledClassName = []
     if(inHeader) {
         styles.boxShadow = 'black 5px 5px 15px'
     }
+    if(inMoviePage) {
+        styledClassName.push('inMoviePage')
+    }
+    if(inLoginModal) {
+        styledClassName.push('inLoginModal')
+    }
+    if(inMyUserPage) {
+        styledClassName.push('inMyUserPage')
+    }
+    if(inMyListsPage){
+        styledClassName.push('inMyListsPage')
+    }
+    if(loadMore){
+        styledClassName.push('loadMore')
+    }
+    if(inListPage){
+        styledClassName.push('inListPage')
+    }
+    if(secondary) {
+        styledClassName.push('secondary')
+    }
 
     return (
-    <Button style={styles} className={inMoviePage ? 'inMoviePage' : ''}>
+    <Button style={styles} className={styledClassName.join(' ')} onClick={styledOnClick}>
         {children}
-        <span style={description ? {} : {opacity: '0'}}>{description}</span>
+        <span style={description ? {} : {display: 'none'}}>{description}</span>
     </Button>
     )
 }

@@ -2,10 +2,14 @@ import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 
+import {Link} from 'react-router-dom'
+
 import firebase from 'firebase';
 import 'firebase/firestore';
+import {connect} from 'react-redux'
 
 import MovieCard from './MovieCard'
+import Loader from './Loader'
 
 const Slider = styled.div`
     display: flex;
@@ -42,49 +46,94 @@ const Title = styled.h4`
     color: white;
     font-family: var(--racing-sans-one-family);
     font-size: 3rem;
+    width: fit-content;
+    transition: all 1s;
+    &:hover {
+        color: #0099ff;
+        transition: all 1s;
+    }
     @media screen and (max-width: 640px) {
         font-size: 2.5rem;
   }
 `
 
-const MovieSlider = ({title, children, mediaType, firebaseDocId}) => {
+const TitleWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const MovieSlider = ({title, children, mediaType, firebaseDocId, user}) => {
     const [state, setState] = useState()
 
     useEffect(() => {
-        if(firebaseDocId) { 
-            firebase.firestore().collection('users').doc('GH6s3ts7FfoKNv2o2qUi').collection('lists').doc(`${firebaseDocId}`)
+        if(firebaseDocId && user !== undefined && user !== null) { 
+            firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(`${firebaseDocId}`)
             .onSnapshot(function(doc) {
                 setState(doc.data().list)
             })
-        } else { 
+        /* if(firebaseDocId && firebase.auth().currentUser !== null) {
+            firebase.firestore().collection('users').doc(user.uid).collection('lists').doc(`${firebaseDocId}`)
+            .onSnapshot(function(doc) {
+                setState(doc.data().list)
+            }) */
+        } else if (user !== undefined) { 
             axios.get(`https://api.themoviedb.org/3/trending/${mediaType}/week?api_key=81d1f6291941e4cbb7818fa6c6be6f85`)
             .then(resp => setState(resp.data.results))
         }
-    }, [])
+    }, [user/* , firebase.auth().currentUser */])
 
-    return (
-        <div>
+    if(state !== undefined && state.length !== 0) {
+        return (
             <div>
-                <Title>
-                    {`${title} >`}
-                </Title>
+                <TitleWrapper>
+                    {firebaseDocId === undefined
+                        ? 
+                            <Link to={`/db/trending/${mediaType}/trends`} key={`${mediaType}-trending`}>
+                                <Title>
+                                    {`${title} >`}
+                                </Title>
+                            </Link>
+                        :
+                            <Link to={`/list/${firebaseDocId}`} key={firebaseDocId}>
+                                <Title>
+                                    {`${title} >`}
+                                </Title>
+                            </Link>
+                    }
+                    
+                </TitleWrapper>
+                <Slider>
+                    {children}
+                    {state === undefined ? <Loader/> : state.length === 0 
+                        ? 'Lista vacia' 
+                        : state.map(e => 
+                        <MovieCard 
+                            movieTitle={mediaType === 'movie' ? e.title : e.name} 
+                            movieSrc={e.poster_path} 
+                            movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
+                            link={mediaType === 'movie' ? `media/movie/${e.id}` : `media/tv/${e.id}`}
+                            key={`${mediaType}-${e.id}`} 
+                        />
+                    )}
+                    {/* {state === undefined ? '' : state.length === 20 ? 'Ver más' : ''} */}
+                </Slider>
             </div>
-            <Slider>
-                {children}
-                {console.log(state)}
-                {state === undefined ? 'Cargando...' : state.length === 0 ? 'Lista vacia' : state.map(e => 
-                    <MovieCard 
-                        movieTitle={mediaType === 'movie' ? e.title : e.name} 
-                        movieSrc={e.poster_path} 
-                        movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
-                        link={mediaType === 'movie' ? `media/movie/${e.id}` : `media/tv/${e.id}`}
-                        key={`${mediaType}-${e.id}`} 
-                    />
-                )}
-                {state === undefined ? '' : state.length === 20 ? 'Ver más' : ''}
-            </Slider>
-        </div>
-    )
+        )
+    } else {
+        return (
+            <></>
+        )
+    }
+    
 }
 
-export default MovieSlider
+const mapStateToProps = state => {
+    return ({
+        user: state.user
+    })
+}
+
+const mapDispatchToProps = dispatch => ({})
+
+export default connect(mapStateToProps, mapDispatchToProps)(MovieSlider)
