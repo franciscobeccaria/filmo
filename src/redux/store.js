@@ -13,8 +13,8 @@ const initialStore = {
 };
 
 const rootReducer = (state = initialStore, action) => {
-  console.log(action);
-  console.log(state);
+  /* console.log(action);
+  console.log(state); */
   if (action.type === GET_USER_DATA) {
     return {
       ...state,
