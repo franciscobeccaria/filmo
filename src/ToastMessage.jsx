@@ -60,11 +60,11 @@ const ToastMessage = ({toastMessageText, toastMessage}) => {
     const toastMessageWrapper = useRef(null);
 
     const showToastMessage = () => {
-            toastMessage.current.innerHTML = toastMessageText
-            toastMessage.current.classList.add('animation')
+            toastMessageWrapper.current.innerHTML = toastMessageText
+            toastMessageWrapper.current.classList.add('animation')
             setTimeout(function () {
-                toastMessage.current.innerHTML = ''
-                toastMessage.current.classList.remove('animation')
+                toastMessageWrapper.current.innerHTML = ''
+                toastMessageWrapper.current.classList.remove('animation')
                 toastMessage('')
             }, 2000);
     }
