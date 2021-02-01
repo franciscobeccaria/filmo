@@ -27,9 +27,9 @@ const Wrapper = styled.li`
     }
 `
 
-const SearchResult = ({title, year, link}) => (
+const SearchResult = ({title, year, link, propsOnClick}) => (
     <Link to={link}>
-        <Wrapper>
+        <Wrapper onClick={propsOnClick}>
             <p>{title} ({year})</p>
         </Wrapper>
     </Link>

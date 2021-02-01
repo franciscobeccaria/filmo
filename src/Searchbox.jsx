@@ -240,6 +240,19 @@ class Searchbox extends Component {
         this.tvRadioInput = React.createRef();
         this.searchBoxSegmentedControl = React.createRef();
         this.searchBoxInput = React.createRef();
+        this.wrapperRef = React.createRef();
+        // searchBox. className='search-box'
+        // input. searchBox.children[1]
+        // button. searchBox.children[2]
+        // parent. searchBox.parentElement. 
+        // button.firstElementChild. Al ser un button no hace falta.
+        // this.searchBoxSegmentedControl.current.children[0, 1, 2, 3]
+        // header. searchBox.parentElement.parentElement.parentElement.parentElement
+        // wrapper. searchBox.parentElement.
+        // searchResults. searchBox.children[0]
+        // segmentedControl. searchResults.children[0]
+        // El problema es que algunos no están en el Componente.
+        // Header y Wrapper son los problemas. 
 
         this.state = {
             openSearch: false,
@@ -251,6 +264,8 @@ class Searchbox extends Component {
         this.onChangeInput = this.onChangeInput.bind(this)
         this.delayTimer = undefined
         this.doSearch = this.doSearch.bind(this)
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.closeSearchBox = this.closeSearchBox.bind(this);
     }
 
     doSearch(searchURL) {
@@ -265,6 +280,7 @@ class Searchbox extends Component {
     }
 
     onClickButton(e) {
+        console.log('click in btnnn')
         this.searchBoxInput.current.focus()
         this.setState({
             openSearch: true,
@@ -296,14 +312,35 @@ class Searchbox extends Component {
         }
     }
 
+    handleClickOutside(event) {
+        if (this.wrapperRef && !this.wrapperRef.current.contains(event.target)) {
+            this.setState({
+                openSearch: false,
+                openResults: false,
+            })
+        }
+    }
+
+    closeSearchBox() {
+        this.setState({
+            openSearch: false,
+            openResults: false,
+        })
+    }
+
     componentDidMount() {
         const searchBox = document.getElementsByClassName('search-box')[0];
         const input = searchBox.children[1];
         const button = searchBox.children[2];
         searchBox.parentElement.style.position = 'relative'
         
+        document.addEventListener('mousedown', this.handleClickOutside);
+
         // Close Searchbox if click outside
-        document.addEventListener('click', (e) => {
+        /* document.addEventListener('click', (e) => {
+            console.log(e.target)
+            console.log(this.searchBoxSegmentedControl.current)
+            console.log(this.searchBoxSegmentedControl.current.children)
             if (e.target !== button && 
                 e.target !== input && 
                 e.target !== button.firstElementChild && 
@@ -318,7 +355,7 @@ class Searchbox extends Component {
                     openResults: false,
                 })
             }
-        });
+        }); */
 
         // Assign distance between Searchbox and ScreenLeft
         this.distanceSearchBoxToScreenLeft = searchBox.getBoundingClientRect().left
@@ -389,7 +426,7 @@ class Searchbox extends Component {
 
     render() {
         return (
-            <Wrapper className="search-box">
+            <Wrapper className="search-box" ref={this.wrapperRef}>
                 <div>
                     <SegmentedControl className="segmented-control" ref={this.searchBoxSegmentedControl}>
                         <input className='one' type="radio" id="movies-searchbox" name="mediatype-searchbox" value="movies-searchbox" ref={this.moviesRadioInput} defaultChecked={true} onChange={() => this.onChangeInput()}/>
@@ -408,11 +445,12 @@ class Searchbox extends Component {
                                 year={e.release_date === undefined ? e.first_air_date === undefined ? '' : e.first_air_date.slice(0,4) : e.release_date.slice(0,4)}
                                 link={e.title === undefined ? `/media/tv/${e.id}` : `/media/movie/${e.id}`}
                                 key={e.id === undefined ? '' : e.id}
+                                propsOnClick={this.closeSearchBox}
                             />
                         )}
                         {this.state.resultsData.total_results === undefined ? '' : this.state.resultsData.total_results >= 16 
                         ? <Link to={`/db/search/${this.moviesRadioInput.current.checked === true ? 'movie' : 'tv'}/${this.searchBoxInput.current.value.trim().toLowerCase().replace(/ /g, '+')}`}>
-                            <LoadMoreResults><p>Load More ></p></LoadMoreResults>
+                            <LoadMoreResults onClick={this.closeSearchBox}><p>Load More ></p></LoadMoreResults>
                         </Link>
                         : ''
                         }
