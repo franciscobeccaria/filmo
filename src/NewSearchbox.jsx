@@ -225,7 +225,7 @@ const SegmentedControl = styled.div`
     }
 `
 
-const NewSearchbox = () => {
+const Searchbox = () => {
     
     const moviesRadioInput = useRef(null)
     const tvRadioInput = useRef(null)
@@ -441,4 +441,4 @@ const NewSearchbox = () => {
     )
 }
 
-export default NewSearchbox
+export default Searchbox
