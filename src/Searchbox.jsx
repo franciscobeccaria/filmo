@@ -269,7 +269,9 @@ class Searchbox extends Component {
     }
 
     doSearch(searchURL) {
+        console.log('pre', this.delayTimer)
         clearTimeout(this.delayTimer);
+        console.log('post', this.delayTimer)
         this.delayTimer = setTimeout(() => {
             axios.get(searchURL).then(response => {
                 this.setState({

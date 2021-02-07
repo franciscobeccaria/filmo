@@ -10,6 +10,7 @@ import { showLoginModal } from './redux/actionCreators';
 import {connect} from 'react-redux'
 
 import Searchbox from './Searchbox'
+import NewSearchbox from './NewSearchbox'
 import StyledButton from './StyledButton'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -77,6 +78,7 @@ const Header = ({loginModal, user}) => {
         <nav>
             <ul>
                 <Li>
+                    {/* <NewSearchbox user={user}/> */}
                     <Searchbox user={user}/>
                 </Li>
                 {user
