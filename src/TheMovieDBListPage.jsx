@@ -107,7 +107,7 @@ const TheMovieDBListPage = ({match}) => {
             })
         }
         if(match.params.type === 'search') {
-            axios.get(`https://api.themoviedb.org/3/search/${mediaType}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US&query=${match.params.searchValue}`)
+            axios.get(`https://api.themoviedb.org/3/search/${mediaType}?api_key=81d1f6291941e4cbb7818fa6c6be6f85&language=en-US&query=${match.params.searchValue}&page=${lengthState.showedMovies}`)
             .then(resp => {
                 if (resp.data.total_pages === 0) {
                     setLengthState({
@@ -155,7 +155,7 @@ const TheMovieDBListPage = ({match}) => {
                     <MovieCard 
                         movieTitle={mediaType === 'movie' ? e.title : e.name} 
                         movieSrc={e.poster_path} 
-                        movieYear={mediaType === 'movie' ? e.release_date.slice(0, 4) : e.first_air_date.slice(0, 4)}
+                        movieYear={mediaType === 'movie' ? e.release_date ? e.release_date.slice(0, 4) : '' : e.first_air_date ? e.first_air_date.slice(0, 4) : ''}
                         link={mediaType === 'movie' ? `/media/movie/${e.id}` : `/media/tv/${e.id}`}
                         key={`${mediaType}-${e.id}`} 
                     />
