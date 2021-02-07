@@ -342,15 +342,7 @@ const NewSearchbox = () => {
     useEffect(() => {
         wrapper.current.parentElement.style.position = 'relative'
 
-        /* document.addEventListener('mousedown', (e) => handleClickOutside(e)); */
-
-        /* window.addEventListener('resize', () => {
-            setState({
-                ...state,
-                openSearch: false,
-                openResults: false,
-            })
-        }) */
+        document.addEventListener('mousedown', (e) => handleClickOutside(e));
     },[])
 
     // componentDidUpdate

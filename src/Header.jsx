@@ -78,8 +78,8 @@ const Header = ({loginModal, user}) => {
         <nav>
             <ul>
                 <Li>
-                    {/* <NewSearchbox user={user}/> */}
-                    <Searchbox user={user}/>
+                    <NewSearchbox user={user}/>
+                    {/* <Searchbox user={user}/> */}
                 </Li>
                 {user
                     ? 
