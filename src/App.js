@@ -17,12 +17,7 @@ import MyUser from './MyUser';
 import MyLists from './MyLists';
 import ListPage from './ListPage';
 import TheMovieDBListPage from './TheMovieDBListPage';
-
-const Footer = styled.footer`
-  width: 100%;
-  height: 150px;
-  background-color: black;
-`;
+import Footer from './Footer';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyD1y5PGwnWyxGk1sYW9BUkNwWx9H_tf8zc',
