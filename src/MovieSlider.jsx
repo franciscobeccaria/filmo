@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 
@@ -11,14 +11,20 @@ import {connect} from 'react-redux'
 import MovieCard from './MovieCard'
 import Loader from './Loader'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleDoubleRight, faAngleDoubleLeft } from '@fortawesome/free-solid-svg-icons'
+
+const SM_MARGIN_SLIDER = '0 50px';
+const MARGIN_SLIDER = '0 20px';
+
 const Slider = styled.div`
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
-    margin: 0 50px;
+    margin: ${SM_MARGIN_SLIDER};
     @media screen and (max-width: 640px) {
-        margin: 0 20px;
-  }
+        margin: ${MARGIN_SLIDER};
+    }
     &::-webkit-scrollbar-track {
         box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -27,6 +33,7 @@ const Slider = styled.div`
     }
 
     &::-webkit-scrollbar {
+        display: none;
         width: 6px;
         height: 6px;
         background-color: transparent;
@@ -56,7 +63,7 @@ const Title = styled.h4`
         transition: all 1s;
     }
     @media screen and (max-width: 640px) {
-        font-size: 2.5rem;
+        font-size: 2rem;
   }
 `
 
@@ -64,9 +71,63 @@ const TitleWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    & a {
+        margin: 0 auto;
+    }
+`
+
+const SliderButtons = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: ${SM_MARGIN_SLIDER};
+    margin-left: 0;
+    @media screen and (max-width: 640px) {
+        margin: ${MARGIN_SLIDER};
+        margin-left: 0;
+    }
+    & button {
+        background-color: transparent;
+        border: 0;
+        border-radius: 8px;
+        font-size: 20px;
+        padding: 8px;
+        margin: 2px;
+        color: white;
+        cursor: pointer;
+        outline: none;
+        transition: color .3s ease-in-out;
+        @media screen and (max-width: 640px) {
+            font-size: 18px;
+            padding: 6px;
+        }
+        &:hover {
+            color: #0099ff;
+        }
+    }
 `
 
 const MovieSlider = ({title, children, mediaType, firebaseDocId, user}) => {
+
+    const slider = useRef(null)
+
+    const handleOnClickSlide = (direction) => {
+        if(direction === 'right') {
+            slider.current.scrollBy({
+                top: 0, 
+                left: slider.current.getBoundingClientRect().width, 
+                behavior: 'smooth'
+              });
+        }
+        if(direction === 'left') {
+            slider.current.scrollBy({
+                top: 0, 
+                left: -slider.current.getBoundingClientRect().width, 
+                behavior: 'smooth'
+              });
+        }
+    }
+
     const [state, setState] = useState()
 
     useEffect(() => {
@@ -102,11 +163,15 @@ const MovieSlider = ({title, children, mediaType, firebaseDocId, user}) => {
                                 <Title>
                                     {`${title} >`}
                                 </Title>
+                                
                             </Link>
                     }
-                    
+                    <SliderButtons>
+                        <button onClick={() => handleOnClickSlide('left')}><FontAwesomeIcon icon={faAngleDoubleLeft} /></button>
+                        <button onClick={() => handleOnClickSlide('right')}><FontAwesomeIcon icon={faAngleDoubleRight} /></button>
+                    </SliderButtons>
                 </TitleWrapper>
-                <Slider>
+                <Slider ref={slider}>
                     {children}
                     {state === undefined ? <Loader/> : state.length === 0 
                         ? 'Lista vacia' 

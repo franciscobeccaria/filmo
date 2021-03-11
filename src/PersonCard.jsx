@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 
 const Wrapper = styled.div`
     display: flex;
@@ -51,7 +52,7 @@ const PersonCard = ({picture, name, credit}) => {
     return (
         <Wrapper>
             <div className='picture'>
-                <img src={`https://image.tmdb.org/t/p/w220_and_h330_face${picture}`} alt={name}/>
+                <img src={picture === null ? 'https://www.softzone.es/app/uploads/2018/04/guest.png' : `https://image.tmdb.org/t/p/w220_and_h330_face${picture}`} alt={name}/>
             </div>
             <div className='name'>
                 {name}
@@ -61,6 +62,18 @@ const PersonCard = ({picture, name, credit}) => {
             </div>
         </Wrapper>
     )
+}
+
+PersonCard.propTypes = {
+    picture: PropTypes.string,
+    name: PropTypes.string,
+    credit: PropTypes.string,
+}
+
+PersonCard.defaultProps = {
+    picture: 'https://www.softzone.es/app/uploads/2018/04/guest.png',
+    name: 'Name not found',
+    credit: 'Credit not found'
 }
 
 export default PersonCard

@@ -207,6 +207,7 @@ const ListCheckbox = ({firebaseListName, children, mediaInfo, toastMessage, user
                 console.log('Error getting document:', error);
               });
     }
+    
     if(user === null) {
         return (
             <Wrapper className={styledClassName.join(' ')}>

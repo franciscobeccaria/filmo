@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import {Link} from 'react-router-dom'
+import ListCheckbox from './ListCheckbox'
 
 const Wrapper = styled.div`
   margin: 1rem 2rem;
@@ -71,12 +72,44 @@ const MovieText = styled.p`
   }
 `
 
+const Options = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  opacity: 0;
+  padding-right: 6px;
+  & .op {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: var(--roboto-family);
+    background-color: rgb(0, 0, 0, .5);
+    color: white;
+    padding: 6px;
+    margin: 4px 0;
+    transition: all .5s ease-in-out;
+    &:hover {
+      transition: all .5s ease-in-out;
+      background-color: #0099ff;
+    }
+  }
+`
+
 const MovieCard = ({movieTitle, movieSrc, movieYear, link}) => (
     <Wrapper>
       <Link to={`${link}`}>
         <PosterContainer className="poster-container">
             <PosterImage src={`https://image.tmdb.org/t/p/w220_and_h330_face/${movieSrc}`} alt={movieTitle} />
             <HoverEffect></HoverEffect>
+            <Options>
+              {/* <span className='op option-1'>Add to Want-To-See</span>
+              <span className='op option-2'>Add to Seen-It</span> */}
+            </Options>
         </PosterContainer>
         <MovieTextContainer>
             <MovieText className="movie-text">{`${movieTitle} (${movieYear})`}</MovieText>
