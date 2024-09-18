@@ -40,6 +40,7 @@ const PosterImage = styled.img`
   height: 100%;
   width: 100%;
   object-fit: cover;
+  border-radius: 1rem;
 `
 
 const HoverEffect = styled.div`
@@ -51,6 +52,7 @@ top:0;
 left: 0;
 opacity: 0;
 transition: all 0.5s;
+border-radius: 1rem;
 `
 
 const MovieTextContainer = styled.div`

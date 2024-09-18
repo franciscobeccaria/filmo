@@ -42,15 +42,12 @@ const Wrapper = styled.footer`
 const Footer = () => {
     return (
         <Wrapper>
-            <p className='title'>Francisco Beccaria © 2021 - All rights reserved</p>
+            <p className='title'>Francisco Beccaria © 2024 - All rights reserved</p>
             <div className='container'>
-                <a href="https://github.com/franciscobeccaria" target="_blank" rel="noreferrer" title='GitHub'>
+                <a href="https://franbeccaria.com" target="_blank" rel="noreferrer" title='GitHub'>
                     <FontAwesomeIcon icon={faGithub} size='3x'/>
                 </a>
-                <a href="https://twitter.com/Fran_dev_" target="_blank" rel="noreferrer" title='Twitter'>
-                    <FontAwesomeIcon icon={faTwitter} size='3x' className='transition duration-500 ease-in-out text-white hover:opacity-75 m-4 cursor-pointer transform hover:-translate-y-1 hover:scale-110'/>
-                </a>
-                <a href="https://www.linkedin.com/in/francisco-b-5119b3114/" target="_blank" rel="noreferrer" title='LinkedIn'>
+                <a href="https://franbeccaria.com" target="_blank" rel="noreferrer" title='LinkedIn'>
                     <FontAwesomeIcon icon={faLinkedinIn} size='3x' className='transition duration-500 ease-in-out text-white hover:opacity-75 m-4 cursor-pointer transform hover:-translate-y-1 hover:scale-110'/>
                 </a>
             </div>
