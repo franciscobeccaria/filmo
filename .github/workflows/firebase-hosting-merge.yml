@@ -18,12 +18,6 @@ jobs:
         with:
           node-version: '18.20.4'
 
-      # Optionally use nvm to ensure the correct Node version is used
-      - name: Use Node.js version with nvm
-        run: |
-          nvm install 18.20.4
-          nvm use 18.20.4
-
       # Install dependencies
       - run: yarn
 
