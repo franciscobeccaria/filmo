@@ -23,6 +23,12 @@ jobs:
           unset CI
           yarn
           yarn build
+      # Deploy to Firebase Hosting Preview Channel
+      - name: Deploy to Firebase Preview Channel
+        run: |
+          npx firebase-tools@latest hosting:channel:deploy preview --expires 7d --project filmo-55c78
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       # Deploy to Firebase Hosting
       - name: Deploy to Firebase Hosting
