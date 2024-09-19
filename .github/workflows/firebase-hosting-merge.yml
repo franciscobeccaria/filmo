@@ -29,7 +29,7 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$HOME"/gcloud-key.json
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud-key.json"
-          npx firebase-tools@latest hosting:channel:deploy preview --expires 7d --project filmo-55c78
+          npx firebase-tools@latest hosting:channel:deploy preview --channelId my-preview --expires 7d --project filmo-55c78
 
       # Deploy to Firebase Hosting
       - name: Deploy to Firebase Hosting
