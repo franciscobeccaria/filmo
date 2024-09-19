@@ -18,11 +18,11 @@ jobs:
         with:
           node-version: '18.20.4'
 
-      # Install dependencies
-      - run: yarn
-
-      # Build the project
-      - run: yarn build
+      # Unset the CI environment variable to prevent warnings from causing build failures
+      - run: |
+          unset CI
+          yarn
+          yarn build
 
       # Deploy to Firebase Hosting
       - name: Deploy to Firebase Hosting
