@@ -33,8 +33,8 @@ jobs:
 
       # Deploy to Firebase Hosting
       - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: filmo-55c78  # Your Firebase project ID
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$HOME"/gcloud-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud-key.json"
+          npx firebase-tools@latest deploy --only hosting --project filmo-55c78
+          
